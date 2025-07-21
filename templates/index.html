@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOOK Rail Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* Green */
+            --secondary-color: #6C757D; /* Gray */
+            --accent-color: #FFC107; /* Amber */
+            --background-light: #F8F9FA; /* Lighter Gray Background */
+            --text-dark: #343A40; /* Dark Text */
+            --card-bg: #FFFFFF; /* Card Background */
+            --border-color: #DEE2E6; /* Light Border */
+            --success-color: #28A745;
+            --danger-color: #DC3545;
+            --info-color: #17A2B8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px 0;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll due to animations */
+        }
+
+        /* Container fluid for full width */
+        .container-fluid {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            margin-top: 20px;
+            max-width: calc(100% - 40px); /* Add some side padding for fluid container */
+            transition: all 0.5s ease-out; /* Smooth transition for resizing if needed */
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        /* Button Animations */
+        .btn-primary, .btn-secondary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #45a049; /* Slightly darker green */
+            border-color: #45a049;
+            transform: translateY(-2px); /* Slight lift */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+            transform: translateY(-2px); /* Slight lift */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-outline-secondary {
+            transition: all 0.2s ease;
+        }
+        .btn-outline-secondary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--secondary-color);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 12px 20px;
+            transition: all 0.3s ease; /* Smooth transition for tab changes */
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-color: var(--border-color) var(--border-color) var(--card-bg);
+            border-bottom-color: var(--card-bg) !important;
+            font-weight: 600;
+            background-color: var(--card-bg);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05); /* Subtle shadow on active tab */
+        }
+        .nav-tabs .nav-link:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: var(--background-light);
+        }
+
+        .tab-content {
+            padding: 30px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: -1px; /* Overlap with tab border */
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* General card hover */
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .train-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Already existed */
+        }
+        .train-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Animations for elements appearing dynamically --- */
+        #authBox, #mainUI {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        #authBox.show, #mainUI.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* For dynamically loaded content (search results, PNR, etc.) */
+        .results-enter {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .results-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: .3em .6em;
+            font-size: 0.85em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: .25rem;
+        }
+        .status-running { background-color: var(--success-color); color: white; }
+        .status-delayed { background-color: var(--danger-color); color: white; }
+        .status-reached, .status-departed, .status-approaching { background-color: var(--info-color); color: white; }
+        .status-confirmed { background-color: var(--success-color); color: white; }
+        .status-waiting-list { background-color: var(--accent-color); color: var(--text-dark); }
+        .status-cancelled { background-color: var(--danger-color); color: white; }
+
+
+        .dropdown-menu.show {
+            display: block;
+            position: absolute;
+            z-index: 1000;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            width: calc(100% - 2px); /* Adjust to match input width */
+            margin-top: 2px;
+            transition: opacity 0.3s ease, transform 0.3s ease; /* For dropdown */
+        }
+        .dropdown-item {
+            padding: 8px 15px;
+            font-size: 0.95em;
+            color: var(--text-dark);
+            transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: var(--background-light);
+            color: var(--primary-color);
+            padding-left: 20px; /* Slight indentation */
+        }
+
+        .alert-warning {
+            background-color: #FFF3CD;
+            color: #856404;
+            border-color: #FFEBA2;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            background-color: #D4EDDA;
+            color: #155724;
+            border-color: #C3E6CB;
+            border-radius: 8px;
+        }
+
+        .alert-info {
+            background-color: #D1ECF1;
+            color: #0C5460;
+            border-color: #BEE5EB;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid my-5">
+        <h1 class="text-center mb-4">WOOK Rail Connect <i class="fas fa-train"></i></h1>
+
+        <div id="authBox" class="card p-4 mb-4">
+            <h4 class="mb-3 text-center">Welcome! Please Login or Register</h4>
+            <div class="mb-3">
+                <input type="text" id="username" class="form-control" placeholder="Username">
+            </div>
+            <div class="mb-3">
+                <input type="password" id="password" class="form-control" placeholder="Password">
+            </div>
+            <div class="d-grid gap-2 mb-3">
+                <button onclick="login()" class="btn btn-primary">Login</button>
+                <button onclick="register()" class="btn btn-secondary">Register</button>
+            </div>
+            <p id="authMsg" class="text-center text-danger"></p>
+        </div>
+
+        <div id="mainUI" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Welcome, <span id="loggedUser" class="text-primary"></span>!</h4>
+                <button onclick="logout()" class="btn btn-sm btn-outline-secondary">Logout</button>
+            </div>
+
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab" aria-controls="search" aria-selected="true">
+                        <i class="fas fa-search me-2"></i>Search Train
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="route-search-tab" data-bs-toggle="tab" data-bs-target="#route-search" type="button" role="tab" aria-controls="route-search" aria-selected="false">
+                        <i class="fas fa-route me-2"></i>Search By Route
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location" type="button" role="tab" aria-controls="location" aria-selected="false">
+                        <i class="fas fa-map-marker-alt me-2"></i>Live Location
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="book-tab" data-bs-toggle="tab" data-bs-target="#book" type="button" role="tab" aria-controls="book" aria-selected="false">
+                        <i class="fas fa-ticket-alt me-2"></i>Book Ticket
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pnr-tab" data-bs-toggle="tab" data-bs-target="#pnr" type="button" role="tab" aria-controls="pnr" aria-selected="false">
+                        <i class="fas fa-qrcode me-2"></i>PNR Status
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">
+                        <i class="fas fa-history me-2"></i>Booking History
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
+                    <h5 class="mb-3">Find Train Route by Number</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" id="train_no" class="form-control" placeholder="Enter Train Number (e.g., 12301)">
+                        <button onclick="searchTrain()" class="btn btn-primary"><i class="fas fa-search me-1"></i> Search</button>
+                    </div>
+                    <div id="results"></div>
+                </div>
+
+                <div class="tab-pane fade" id="route-search" role="tabpanel" aria-labelledby="route-search-tab">
+                    <h5 class="mb-3">Find Trains Between Stations</h5>
+                    <div class="mb-3">
+                        <input type="text" id="from_station" class="form-control" placeholder="From Station">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="to_station" class="form-control" placeholder="To Station">
+                    </div>
+                    <div class="mb-3">
+                        <input type="date" id="route_date" class="form-control">
+                    </div>
+                    <div class="d-grid gap-2 mb-3">
+                        <button onclick="searchByStations()" class="btn btn-primary"><i class="fas fa-route me-1"></i> Search Route</button>
+                    </div>
+                    <div id="routeSearchResults"></div>
+                </div>
+
+                <div class="tab-pane fade" id="location" role="tabpanel" aria-labelledby="location-tab">
+                    <h5 class="mb-3">Track Live Train Location (Dummy Data)</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" id="train_location_no" class="form-control" placeholder="Enter Train Number">
+                        <button onclick="showTrainLocation()" class="btn btn-primary"><i class="fas fa-map-marker-alt me-1"></i> Track</button>
+                    </div>
+                    <div id="trainLocationResults"></div>
+                </div>
+
+                <div class="tab-pane fade" id="book" role="tabpanel" aria-labelledby="book-tab">
+                    <h5 class="mb-3">Book Your Ticket</h5>
+                    <div class="mb-3">
+                        <input type="text" id="passenger" class="form-control" placeholder="Passenger Name">
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" id="age" class="form-control" placeholder="Age" min="1" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <select id="berth" class="form-select">
+                            <option value="Sleeper">Sleeper</option>
+                            <option value="AC">AC</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="train_input" class="form-control" placeholder="Train Number (e.g., 12951)">
+                    </div>
+                    <div class="mb-3">
+                        <input type="date" id="date" class="form-control">
+                    </div>
+                    <div class="d-grid gap-2 mb-3">
+                        <button onclick="bookTicket()" class="btn btn-primary"><i class="fas fa-ticket-alt me-1"></i> Confirm Booking</button>
+                    </div>
+                    <div id="ticket"></div>
+                </div>
+
+                <div class="tab-pane fade" id="pnr" role="tabpanel" aria-labelledby="pnr-tab">
+                    <h5 class="mb-3">Check PNR Status</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" id="pnr_input" class="form-control" placeholder="Enter PNR Number">
+                        <button onclick="checkPNR()" class="btn btn-primary"><i class="fas fa-qrcode me-1"></i> Check Status</button>
+                    </div>
+                    <div id="pnr_status"></div>
+                </div>
+
+                <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+                    <h5 class="mb-3">Your Booking History</h5>
+                    <div id="bookingHistoryResults">
+                        <p class='text-info'>Loading booking history...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const base = "http://127.0.0.1:5000";
+        // Extensive list of Indian Railway stations for autosuggest
+        const stationList = [
+            "Agra Cantt", "Ahmedabad Junction", "Allahabad Junction", "Alappuzha", "Amritsar Junction",
+            "Anand Vihar Terminal", "Bhopal Junction", "Bhubaneswar", "Bengaluru City Junction", "Bareilly Junction",
+            "Chennai Central", "Chandigarh Junction", "Coimbatore Junction", "Cuttack", "Darbhanga Junction",
+            "Dehradun", "Delhi Junction", "Dhanbad Junction", "Ernakulam Junction", "Firozpur Cantt.",
+            "Ghaziabad Junction", "Goa (Madgaon Junction)", "Gorakhpur Junction", "Gwalior Junction", "Guwahati",
+            "Hazrat Nizamuddin", "Howrah Junction", "Indore Junction", "Jaipur Junction", "Jammu Tawi",
+            "Jamnagar", "Jabalpur", "Jalandhar City", "Jodhpur Junction", "Kanpur Central",
+            "Kanyakumari", "Katra (SMVD Katra)", "Kharagpur Junction", "Kochi (Ernakulam Town)", "Kolkata Sealdah",
+            "Kota Junction", "Kozhikode", "Lucknow NR", "Ludhiana Junction", "Madurai Junction",
+            "Mangaluru Central", "Mathura Junction", "Meerut City", "Mumbai Central", "Mysore Junction",
+            "Nagpur Junction", "Nashik Road", "New Delhi", "Okha", "Old Delhi Junction",
+            "Patna Junction", "Puducherry", "Pune Junction", "Puri", "Raipur Junction",
+            "Rajkot Junction", "Ranchi Junction", "Secunderabad Junction", "Shirdi (Sainagar Shirdi)", "Surat",
+            "Thiruvananthapuram Central", "Tiruchirappalli Junction", "Udaipur City", "Vadodara Junction",
+            "Varanasi Junction", "Vijayawada Junction", "Visakhapatnam Junction", "Yesvantpur Junction",
+            // Add more as needed
+        ];
+
+        function attachAutoSuggest(id) {
+            const input = document.getElementById(id);
+            const container = document.createElement("div");
+            container.className = "dropdown-menu"; // Initially hidden
+            container.style.position = "absolute";
+            container.style.width = "calc(100% - 2px)";
+            input.parentNode.style.position = "relative";
+            input.parentNode.appendChild(container);
+
+            input.addEventListener("input", () => {
+                const val = input.value.toLowerCase();
+                container.innerHTML = "";
+                if (!val) {
+                    container.classList.remove('show');
+                    return;
+                }
+                const filteredStations = stationList.filter(s => s.toLowerCase().includes(val)).slice(0, 10);
+                if (filteredStations.length > 0) {
+                    container.classList.add('show');
+                    filteredStations.forEach(station => {
+                        const item = document.createElement("a");
+                        item.className = "dropdown-item";
+                        item.textContent = station;
+                        item.href = "#";
+                        item.onclick = (e) => {
+                            e.preventDefault();
+                            input.value = station;
+                            container.innerHTML = "";
+                            container.classList.remove('show');
+                        };
+                        container.appendChild(item);
+                    });
+                } else {
+                    container.classList.remove('show');
+                }
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!input.contains(e.target) && !container.contains(e.target)) {
+                    container.classList.remove('show');
+                }
+            });
+
+            input.addEventListener('focus', () => {
+                if (input.value.length > 0) {
+                    const val = input.value.toLowerCase();
+                    const filteredStations = stationList.filter(s => s.toLowerCase().includes(val)).slice(0, 10);
+                    if (filteredStations.length > 0) {
+                        container.classList.add('show');
+                    }
+                }
+            });
+        }
+
+
+        function extractName(val) {
+            return val.trim();
+        }
+
+        // Helper to animate content after it's loaded
+        function animateResults(selector) {
+            setTimeout(() => {
+                document.querySelectorAll(selector).forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('results-enter-active');
+                    }, 50 * index); // Stagger the animation
+                });
+            }, 10); // Small delay to ensure DOM update
+        }
+
+        // Helper to get status badge class
+        function getStatusBadgeClass(status) {
+            switch(status.toLowerCase()) {
+                case 'confirmed': return 'status-confirmed';
+                case 'waiting list': return 'status-waiting-list';
+                case 'cancelled': return 'status-cancelled';
+                default: return 'status-info';
+            }
+        }
+
+        // --- Authentication Functions ---
+        function register() {
+            const uname = username.value.trim();
+            const pass = password.value.trim();
+            if (!uname || !pass) {
+                authMsg.innerText = "Please enter both username and password.";
+                authMsg.className = 'text-center text-danger';
+                return;
+            }
+            fetch(`${base}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: uname, password: pass }),
+                credentials: "include"
+            })
+            .then(r => r.json())
+            .then(d => {
+                authMsg.innerText = d.message || d.error;
+                authMsg.className = d.message ? 'text-center text-success' : 'text-center text-danger';
+                if (d.message) {
+                    // Optionally clear fields or prompt login after successful registration
+                    username.value = '';
+                    password.value = '';
+                }
+            })
+            .catch(e => {
+                console.error("Registration error:", e);
+                authMsg.innerText = "Error: Could not connect to server or registration failed.";
+                authMsg.className = 'text-center text-danger';
+            });
+        }
+
+        function login() {
+            const uname = username.value.trim();
+            const pass = password.value.trim();
+            if (!uname || !pass) {
+                authMsg.innerText = "Please enter both username and password.";
+                authMsg.className = 'text-center text-danger';
+                return;
+            }
+            fetch(`${base}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: uname, password: pass }),
+                credentials: "include"
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.message) {
+                    authBox.classList.remove('show'); // Start fading out auth box
+                    setTimeout(() => {
+                        authBox.style.display = "none";
+                        mainUI.style.display = "block";
+                        loggedUser.innerText = uname; // Update username immediately
+                        // Set today's date for inputs
+                        const today = new Date();
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        const todayFormatted = `${yyyy}-${mm}-${dd}`;
+                        document.getElementById("route_date").value = todayFormatted;
+                        document.getElementById("date").value = todayFormatted;
+
+                        mainUI.classList.add('show'); // Fade in main UI
+                    }, 600); // Wait for authBox transition to finish
+                } else {
+                    authMsg.innerText = d.error;
+                    authMsg.className = 'text-center text-danger';
+                }
+            })
+            .catch(e => {
+                console.error("Login error:", e);
+                authMsg.innerText = "Error: Could not connect to server or login failed.";
+                authMsg.className = 'text-center text-danger';
+            });
+        }
+
+        function logout() {
+            fetch(`${base}/logout`, { credentials: "include" })
+                .then(() => {
+                    mainUI.classList.remove('show'); // Start fading out main UI
+                    setTimeout(() => {
+                        mainUI.style.display = "none";
+                        authBox.style.display = "block";
+                        username.value = ''; // Clear fields
+                        password.value = '';
+                        authMsg.innerText = ''; // Clear auth message
+                        authBox.classList.add('show'); // Fade in auth box
+                    }, 600); // Wait for mainUI transition to finish
+                })
+                .catch(e => console.error("Logout error:", e));
+        }
+
+        function checkLogin() {
+            fetch(`${base}/me`, { credentials: "include" })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.user) {
+                        authBox.style.display = "none";
+                        mainUI.style.display = "block";
+                        loggedUser.innerText = d.user;
+                        // Set today's date for inputs
+                        const today = new Date();
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        const todayFormatted = `${yyyy}-${mm}-${dd}`;
+                        document.getElementById("route_date").value = todayFormatted;
+                        document.getElementById("date").value = todayFormatted;
+
+                        setTimeout(() => mainUI.classList.add('show'), 10); // Small delay to trigger transition
+                    } else {
+                        authBox.style.display = "block";
+                        mainUI.style.display = "none";
+                        setTimeout(() => authBox.classList.add('show'), 10); // Small delay to trigger transition
+                    }
+                })
+                .catch(e => {
+                    console.error("Login check error:", e);
+                    authBox.style.display = "block"; // Show auth if check fails
+                    mainUI.style.display = "none";
+                    setTimeout(() => authBox.classList.add('show'), 10); // Trigger animation on error
+                });
+        }
+
+        // --- Main Feature Functions ---
+
+        function searchTrain() {
+            const trainNum = train_no.value.trim();
+            results.innerHTML = ""; // Clear previous results
+
+            if (!trainNum) {
+                results.innerHTML = "<p class='text-danger'>Please enter a train number.</p>";
+                return;
+            }
+
+            results.innerHTML = "<p class='text-info'><i class='fas fa-spinner fa-spin me-2'></i>Fetching train route...</p>";
+
+            fetch(`${base}/route?train_no=${trainNum}`)
+                .then(r => r.json())
+                .then(d => {
+                    if (!d || d.length === 0) {
+                        results.innerHTML = "<p class='text-info'>No route data found for this train number.</p>";
+                        return;
+                    }
+                    let htmlContent = `<h4>Route for Train ${trainNum}</h4>`;
+                    d.forEach(s => {
+                        htmlContent += `
+                            <div class="train-card results-enter">
+                                <b>${s.seq}. ${s.station_name} (${s.station_code})</b><br>
+                                Arrival: ${s.arrival_time || "-"} | Departure: ${s.departure_time || "-"}<br>
+                                Distance: ${s.distance_km} km
+                            </div>`;
+                    });
+                    results.innerHTML = htmlContent;
+                    animateResults('#results .train-card'); // Animate newly added cards
+                })
+                .catch(e => {
+                    console.error("Error fetching train route:", e);
+                    results.innerHTML = "<p class='text-danger'>Error fetching train route. Please ensure the backend is running and the train number is valid.</p>";
+                });
+        }
+
+        function showTrainLocation() {
+            const trainNum = document.getElementById("train_location_no").value.trim();
+            const locationResultsDiv = document.getElementById("trainLocationResults");
+            locationResultsDiv.innerHTML = "";
+
+            if (!trainNum) {
+                locationResultsDiv.innerHTML = "<p class='text-danger'>Please enter a train number to track.</p>";
+                return;
+            }
+
+            locationResultsDiv.innerHTML = "<p class='text-info'><i class='fas fa-spinner fa-spin me-2'></i>Fetching live location...</p>";
+
+            // Simulate network delay
+            setTimeout(() => {
+                const latitude = (Math.random() * (30.0 - 25.0) + 25.0).toFixed(4);
+                const longitude = (Math.random() * (85.0 - 75.0) + 75.0).toFixed(4);
+                const speed = (Math.random() * (110 - 60) + 60).toFixed(0);
+                const statusOptions = [
+                    { text: "Running on time", class: "status-running" },
+                    { text: "Delayed by 15 mins", class: "status-delayed" },
+                    { text: "Reached next station: Lucknow", class: "status-reached" },
+                    { text: "Approaching destination: New Delhi", class: "status-approaching" },
+                    { text: "Departed from previous station: Kanpur", class: "status-departed" }
+                ];
+                const randomStatus = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+                // Get current IST time (approximate, for display)
+                const now = new Date();
+                const options = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, year: 'numeric', month: 'numeric', day: 'numeric' };
+                const lastUpdated = now.toLocaleString('en-IN', options);
+
+                locationResultsDiv.innerHTML = `
+                    <div class="train-card results-enter">
+                        <h5><i class="fas fa-train me-2"></i>Live Location for Train ${trainNum}</h5>
+                        <p><b>Status:</b> <span class="status-badge ${randomStatus.class}">${randomStatus.text}</span></p>
+                        <p><b>Current Coordinates:</b> Latitude: ${latitude}, Longitude: ${longitude}</p>
+                        <p><b>Speed:</b> ${speed} km/h</p>
+                        <p><b>Last Updated (IST):</b> ${lastUpdated}</p>
+                    </div>
+                `;
+                animateResults('#trainLocationResults .train-card'); // Animate newly added card
+            }, 1500); // Simulate 1.5 second delay
+        }
+
+        function searchByStations() {
+            const source = extractName(document.getElementById("from_station").value).trim();
+            const dest = extractName(document.getElementById("to_station").value).trim();
+            const routeDate = document.getElementById("route_date").value;
+            const output = document.getElementById("routeSearchResults");
+            output.innerHTML = ""; // Clear previous results
+
+            if (!source || !dest) {
+                output.innerHTML = "<p class='text-danger'>Please enter both 'From' and 'To' stations.</p>";
+                return;
+            }
+
+            output.innerHTML = "<p class='text-info'><i class='fas fa-spinner fa-spin me-2'></i>Searching for trains...</p>";
+
+            fetch(`${base}/search?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(dest)}`)
+                .then(r => {
+                    if (!r.ok) {
+                        return r.json().then(err => Promise.reject(err.error || 'Server error'));
+                    }
+                    return r.json();
+                })
+                .then(d => {
+                    if (d.length > 0) {
+                        let htmlContent = `
+                            <div class="alert alert-warning mt-2 small results-enter">
+                                <i class="fas fa-info-circle me-1"></i>
+                                This train data is fetched from a public API, but the "availability" for the date is simulated.
+                            </div>
+                            <h4>Matching Trains from ${source} to ${dest}</h4>
+                        `;
+                        d.forEach(t => {
+                            htmlContent += `
+                                <div class="train-card results-enter">
+                                    <i class="fas fa-subway me-2 text-info"></i> ${t.train_no} - <b>${t.name}</b>
+                                    <br><small class="text-muted">Available on ${routeDate || 'selected date'}</small>
+                                </div>`;
+                        });
+                        output.innerHTML = htmlContent;
+                        animateResults('#routeSearchResults .results-enter');
+                    } else {
+                        output.innerHTML = "<p class='text-info'>No trains found for this route. Try different stations.</p>";
+                    }
+                })
+                .catch(e => {
+                    console.error("Error searching by stations:", e);
+                    output.innerHTML = `<p class='text-danger'>Error searching trains: ${e}</p>`;
+                });
+        }
+
+
+        function bookTicket() {
+            const passengerName = passenger.value.trim();
+            const passengerAge = age.value;
+            const selectedBerth = berth.value;
+            const bookingTrainNo = train_input.value.trim();
+            const bookingDate = date.value;
+            const ticketDiv = document.getElementById("ticket");
+            ticketDiv.innerHTML = "";
+
+            if (!passengerName || !passengerAge || !bookingTrainNo || !bookingDate) {
+                ticketDiv.innerHTML = "<p class='text-danger'>Please fill all booking details.</p>";
+                return;
+            }
+
+            ticketDiv.innerHTML = "<p class='text-info'><i class='fas fa-spinner fa-spin me-2'></i>Processing booking...</p>";
+
+
+            fetch(`${base}/book`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    passenger: passengerName,
+                    age: passengerAge,
+                    berth: selectedBerth,
+                    train_no: bookingTrainNo,
+                    date: bookingDate
+                }),
+                credentials: "include"
+            }).then(r => r.json())
+                .then(d => {
+                    if (d.pnr) {
+                        const statusClass = getStatusBadgeClass(d.status);
+                        ticketDiv.innerHTML = `
+                            <div class="train-card alert alert-success results-enter">
+                                <h5><i class="fas fa-check-circle me-2"></i>Ticket Booked Successfully!</h5>
+                                <p><b>PNR:</b> <span class="text-primary">${d.pnr}</span></p>
+                                <p><b>Passenger:</b> ${d.passenger}</p>
+                                <p><b>Train:</b> ${d.train_no}</p>
+                                <p><b>Date:</b> ${d.date}</p>
+                                <p><b>Berth:</b> ${d.berth}</p>
+                                <p><b>Status:</b> <span class="status-badge ${statusClass}">${d.status}</span></p>
+                                <div class="alert alert-info mt-2 small">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    This is a dummy booking confirmation. PNR is simulated.
+                                </div>
+                                <div class="d-grid gap-2 mt-3">
+                                    <button onclick="downloadTicket('${d.pnr}')" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i> Download Ticket
+                                    </button>
+                                </div>
+                            </div>`;
+                        animateResults('#ticket .results-enter');
+                        // After booking, refresh history if the history tab is active or soon will be
+                        // A more robust app might use an event bus for this
+                        const historyTabButton = document.getElementById('history-tab');
+                        if (historyTabButton && historyTabButton.classList.contains('active')) {
+                            fetchBookingHistory();
+                        }
+                    } else {
+                        ticketDiv.innerHTML = `<p class="text-danger">${d.error || "Booking failed. Please try again."}</p>`;
+                    }
+                })
+                .catch(e => {
+                    console.error("Booking error:", e);
+                    ticketDiv.innerHTML = "<p class='text-danger'>Error connecting to server or booking failed.</p>";
+                });
+        }
+
+        function downloadTicket(pnr_number) {
+            window.open(`${base}/download/${pnr_number}`, '_blank');
+        }
+
+        function checkPNR() {
+            const pnrNum = pnr_input.value.trim();
+            const pnrStatusDiv = document.getElementById("pnr_status");
+            pnrStatusDiv.innerHTML = "";
+
+            if (!pnrNum) {
+                pnrStatusDiv.innerHTML = "<p class='text-danger'>Please enter a PNR number.</p>";
+                return;
+            }
+
+            pnrStatusDiv.innerHTML = "<p class='text-info'><i class='fas fa-spinner fa-spin me-2'></i>Checking PNR status...</p>";
+
+            fetch(`${base}/pnr/${pnrNum}`, { credentials: "include" })
+                .then(r => {
+                    if (!r.ok) { // Handle HTTP errors (e.g., 401, 404)
+                        return r.json().then(err => Promise.reject(err.error || 'Server error'));
+                    }
+                    return r.json();
+                })
+                .then(d => {
+                    if (d.status) {
+                        const statusClass = getStatusBadgeClass(d.status);
+                        pnrStatusDiv.innerHTML = `
+                            <div class="train-card alert alert-info results-enter">
+                                <h5><i class="fas fa-clipboard-check me-2"></i>PNR Status for ${d.pnr}</h5>
+                                <p><b>Train:</b> ${d.train_no}</p>
+                                <p><b>Passenger:</b> ${d.passenger}</p>
+                                <p><b>Date:</b> ${d.date}</p>
+                                <p><b>Status:</b> <span class="status-badge ${statusClass}">${d.status}</span></p>
+                                <p><b>Coach/Berth:</b> ${d.coach || 'N/A'}/${d.berth || 'N/A'}</p>
+                                <div class="alert alert-warning mt-2 small">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    This PNR status is dummy data.
+                                </div>
+                                <div class="d-grid gap-2 mt-3">
+                                    <button onclick="downloadTicket('${d.pnr}')" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i> Download Ticket
+                                    </button>
+                                </div>
+                            </div>`;
+                        animateResults('#pnr_status .results-enter');
+                    } else {
+                        pnrStatusDiv.innerHTML = `<p class="text-info">No status found for PNR: ${pnrNum}. It might be invalid or does not belong to your account.</p>`;
+                    }
+                })
+                .catch(e => {
+                    console.error("PNR check error:", e);
+                    pnrStatusDiv.innerHTML = `<p class='text-danger'>Error checking PNR status: ${e}</p>`;
+                });
+        }
+
+        // --- NEW: Booking History Function ---
+        function fetchBookingHistory() {
+            const historyResultsDiv = document.getElementById("bookingHistoryResults");
+            historyResultsDiv.innerHTML = "<p class='text-info'><i class='fas fa-spinner fa-spin me-2'></i>Loading your booking history...</p>";
+
+            fetch(`${base}/history`, { credentials: "include" })
+                .then(r => {
+                    if (!r.ok) {
+                        return r.json().then(err => Promise.reject(err.error || 'Server error'));
+                    }
+                    return r.json();
+                })
+                .then(bookings => {
+                    if (bookings.length > 0) {
+                        let htmlContent = `<h4>Your Past Bookings (${bookings.length})</h4>`;
+                        bookings.forEach(b => {
+                            const statusClass = getStatusBadgeClass(b.status);
+                            htmlContent += `
+                                <div class="train-card results-enter">
+                                    <h6 class="mb-2"><i class="fas fa-ticket-alt me-2"></i>Ticket for Train: ${b.train_no}</h6>
+                                    <p class="mb-1"><b>PNR:</b> <span class="text-primary">${b.pnr}</span></p>
+                                    <p class="mb-1"><b>Passenger:</b> ${b.passenger}</p>
+                                    <p class="mb-1"><b>Travel Date:</b> ${b.date}</p>
+                                    <p class="mb-1"><b>Berth:</b> ${b.berth}</p>
+                                    <p class="mb-2"><b>Status:</b> <span class="status-badge ${statusClass}">${b.status}</span></p>
+                                    <button onclick="downloadTicket('${b.pnr}')" class="btn btn-outline-secondary btn-sm mt-2">
+                                        <i class="fas fa-download me-1"></i> Download Ticket
+                                    </button>
+                                </div>`;
+                        });
+                        historyResultsDiv.innerHTML = htmlContent;
+                        animateResults('#bookingHistoryResults .train-card'); // Animate newly added cards
+                    } else {
+                        historyResultsDiv.innerHTML = "<p class='text-info'>You haven't booked any tickets yet.</p>";
+                    }
+                })
+                .catch(e => {
+                    console.error("Error fetching booking history:", e);
+                    historyResultsDiv.innerHTML = `<p class='text-danger'>Error loading booking history: ${e}. Please try again later.</p>`;
+                });
+        }
+
+
+        // --- Event Listeners and Initial Calls ---
+        document.addEventListener('DOMContentLoaded', () => {
+            attachAutoSuggest('from_station');
+            attachAutoSuggest('to_station');
+            checkLogin(); // Check login status and display appropriate UI
+
+            // Listen for the "Booking History" tab to be shown
+            const historyTab = document.getElementById('history-tab');
+            if (historyTab) {
+                historyTab.addEventListener('shown.bs.tab', function (event) {
+                    fetchBookingHistory();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
